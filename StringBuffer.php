@@ -36,6 +36,21 @@ class StringBuffer implements Stringable
     private int $length = 0;
 
     /**
+     * @var string|null Cached concatenated string to avoid repeated implode operations.
+     */
+    private ?string $cachedString = null;
+
+    /**
+     * @var bool Whether the cached string is valid.
+     */
+    private bool $cacheIsValid = false;
+
+    /**
+     * @var int Maximum number of buffer parts before consolidation.
+     */
+    private int $maxBufferParts;
+
+    /**
      * @var resource|null File lock resource for thread synchronization.
      */
     private $lockFile = null;
@@ -49,9 +64,11 @@ class StringBuffer implements Stringable
      * Constructor to initialize the StringBuffer with optional initial content.
      *
      * @param string $initial The initial string content.
+     * @param int $maxBufferParts Maximum buffer parts before consolidation (default: 32).
      */
-    public function __construct(string $initial = '')
+    public function __construct(string $initial = '', int $maxBufferParts = 32)
     {
+        $this->maxBufferParts = max($maxBufferParts, 4);
         $this->lockPath = sys_get_temp_dir() . '/flaphl_stringbuffer_' . uniqid() . '.lock';
         
         if ($initial !== '') {
@@ -98,6 +115,43 @@ class StringBuffer implements Stringable
     }
 
     /**
+     * Invalidate the cached string.
+     */
+    private function invalidateCache(): void
+    {
+        $this->cacheIsValid = false;
+        $this->cachedString = null;
+    }
+
+    /**
+     * Consolidate buffer parts when there are too many.
+     */
+    private function consolidateIfNeeded(): void
+    {
+        if (count($this->buffer) >= $this->maxBufferParts) {
+            $consolidated = implode('', $this->buffer);
+            $this->buffer = [$consolidated];
+            $this->cachedString = $consolidated;
+            $this->cacheIsValid = true;
+        }
+    }
+
+    /**
+     * Get the full string, using cache when possible.
+     */
+    private function getFullString(): string
+    {
+        if ($this->cacheIsValid && $this->cachedString !== null) {
+            return $this->cachedString;
+        }
+
+        $result = implode('', $this->buffer);
+        $this->cachedString = $result;
+        $this->cacheIsValid = true;
+        return $result;
+    }
+
+    /**
      * Append a string to the buffer in a thread-safe manner.
      *
      * @param string $string The string to append.
@@ -105,10 +159,16 @@ class StringBuffer implements Stringable
      */
     public function append(string $string): self
     {
+        if ($string === '') {
+            return $this;
+        }
+
         $this->acquireLock();
         try {
+            $this->invalidateCache();
             $this->buffer[] = $string;
             $this->length += mb_strlen($string, 'UTF-8');
+            $this->consolidateIfNeeded();
             return $this;
         } finally {
             $this->releaseLock();
@@ -123,10 +183,16 @@ class StringBuffer implements Stringable
      */
     public function prepend(string $string): self
     {
+        if ($string === '') {
+            return $this;
+        }
+
         $this->acquireLock();
         try {
+            $this->invalidateCache();
             array_unshift($this->buffer, $string);
             $this->length += mb_strlen($string, 'UTF-8');
+            $this->consolidateIfNeeded();
             return $this;
         } finally {
             $this->releaseLock();
@@ -260,6 +326,8 @@ class StringBuffer implements Stringable
         try {
             $this->buffer = [];
             $this->length = 0;
+            $this->cachedString = '';
+            $this->cacheIsValid = true;
             return $this;
         } finally {
             $this->releaseLock();
@@ -421,7 +489,7 @@ class StringBuffer implements Stringable
     {
         $this->acquireLock();
         try {
-            return implode('', $this->buffer);
+            return $this->getFullString();
         } finally {
             $this->releaseLock();
         }

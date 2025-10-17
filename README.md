@@ -46,7 +46,9 @@ $result = $builder->append('Hello')
 - Thread-safe operations with file-based locking
 - Immutable string operations
 - Method chaining for fluent API
-- Zero-copy optimizations where possible
+- **High-performance string building** with smart chunking and caching
+- **Memory-efficient buffering** with automatic consolidation
+- **Zero-copy optimizations** where possible
 
 ## Testing
 
@@ -56,6 +58,33 @@ vendor/bin/phpunit
 
 # With test documentation
 vendor/bin/phpunit --testdox
+```
+
+## Performance Optimizations
+
+### StringBuilder
+- **SplFixedArray-based chunking** for efficient memory management
+- **Smart consolidation** to prevent memory fragmentation
+- **Result caching** to avoid repeated concatenation
+- **Configurable chunk sizes** for different use cases
+
+### StringBuffer
+- **Intelligent buffering** with automatic consolidation
+- **String result caching** to minimize `implode()` calls
+- **Thread-safe operations** with minimal locking overhead
+- **Memory-efficient** chunk management
+
+### Best Practices
+```php
+// For many small appends, use StringBuilder
+$builder = new StringBuilder();
+for ($i = 0; $i < 1000; $i++) {
+    $builder->append("Item $i\n");
+}
+
+// For thread-safe operations, use StringBuffer
+$buffer = new StringBuffer();
+$buffer->append('Thread-safe content');
 ```
 
 ## Requirements

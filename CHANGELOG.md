@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Performance Improvements
+- **StringBuilder optimization**: Implemented SplFixedArray-based chunking with smart consolidation
+- **StringBuffer caching**: Added intelligent result caching to minimize expensive `implode()` operations
+- **Memory efficiency**: Automatic buffer consolidation prevents memory fragmentation
+- **Reduced copying**: Zero-copy optimizations for common operations
+
+### Changed
+- `StringBuilder` now uses internal chunking with configurable parameters
+- `StringBuffer` implements intelligent caching with automatic consolidation
+- Updated documentation with performance optimization details
+
 ## [1.0.0] - 2025-10-17
 
 ### Added
