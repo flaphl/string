@@ -1,0 +1,25 @@
+# Dependencies
+/vendor/
+composer.lock
+
+# Local PHPUnit configuration (copy from phpunit.xml.dist)
+phpunit.xml
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Test coverage
+/coverage/
+/.phpunit.cache/
+
+# Temporary files
+*.tmp
+*.temp

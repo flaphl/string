@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/11.5/phpunit.xsd"
+         bootstrap="vendor/autoload.php"
+         colors="true"
+         cacheDirectory=".phpunit.cache"
+         executionOrder="depends,defects"
+         stopOnFailure="false"
+         stopOnError="false"
+         stopOnIncomplete="false"
+         stopOnSkipped="false"
+         failOnEmptyTestSuite="false"
+         failOnIncomplete="false"
+         failOnRisky="false"
+         failOnSkipped="false"
+         failOnWarning="false">
+    
+    <!-- Test Suites -->
+    <testsuites>
+        <testsuite name="Flaphl String Element Test Suite">
+            <directory>Tests</directory>
+        </testsuite>
+    </testsuites>
+
+    <!-- Source Code for Coverage -->
+    <source>
+        <include>
+            <directory suffix=".php">./</directory>
+        </include>
+        <exclude>
+            <directory>vendor</directory>
+            <directory>Tests</directory>
+            <file>composer.json</file>
+        </exclude>
+    </source>
+
+    <!-- Coverage Configuration (disabled by default - requires Xdebug or PCOV) -->
+    <!--
+    To enable code coverage:
+    1. Install Xdebug: brew install php@8.4-xdebug (macOS) or apt-get install php-xdebug (Ubuntu)
+    2. Or install PCOV: composer require dev pcov/clobber
+    3. Uncomment the coverage section below
+    4. Run: vendor/bin/phpunit with coverage-html coverage/html
+    
+    <coverage>
+        <report>
+            <clover outputFile="coverage/clover.xml"/>
+            <html outputDirectory="coverage/html" lowUpperBound="50" highLowerBound="80"/>
+            <text outputFile="php://stdout" showUncoveredFiles="false" showOnlySummary="true"/>
+        </report>
+    </coverage>
+    -->
+
+    <!-- PHP Configuration -->
+    <php>
+        <!-- Set error reporting level -->
+        <ini name="error_reporting" value="E_ALL"/>
+        <ini name="display_errors" value="1"/>
+        <ini name="display_startup_errors" value="1"/>
+        
+        <!-- Memory limit for tests -->
+        <ini name="memory_limit" value="256M"/>
+        
+        <!-- Set timezone for consistent test results -->
+        <ini name="date.timezone" value="UTC"/>
+        
+        <!-- Ensure multibyte string functions use UTF-8 -->
+        <!-- Note: mbstring.internal_encoding is deprecated in PHP 8.4+ -->
+        <ini name="default_charset" value="UTF-8"/>
+        
+        <!-- Test environment variables -->
+        <env name="APP_ENV" value="testing"/>
+        <env name="FLAPHL_TEST_MODE" value="true"/>
+    </php>
+
+    <!-- Extensions -->
+    <extensions>
+        <!-- Add any PHPUnit extensions here if needed -->
+    </extensions>
+
+</phpunit>
